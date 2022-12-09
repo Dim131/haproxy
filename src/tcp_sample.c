@@ -373,6 +373,34 @@ static inline int get_tcp_info(const struct arg *args, struct sample *smp,
 	return 1;
 }
 
+/* get the mean rtt of a backend/server connection */
+static int
+smp_fetch_bc_rtt(const struct arg *args, struct sample *smp, const char *kw, void *private)
+{
+	if (!get_tcp_info(args, smp, 1, 0))
+		return 0;
+
+	/* By default or if explicitly specified, convert rtt to ms */
+	if (!args || args[0].type == ARGT_STOP || args[0].data.sint == TIME_UNIT_MS)
+		smp->data.u.sint = (smp->data.u.sint + 500) / 1000;
+
+	return 1;
+}
+
+/* get the variance of the mean rtt of a backend/server connection */
+static int
+smp_fetch_bc_rttvar(const struct arg *args, struct sample *smp, const char *kw, void *private)
+{
+	if (!get_tcp_info(args, smp, 1, 1))
+		return 0;
+
+	/* By default or if explicitly specified, convert rttvar to ms */
+	if (!args || args[0].type == ARGT_STOP || args[0].data.sint == TIME_UNIT_MS)
+		smp->data.u.sint = (smp->data.u.sint + 500) / 1000;
+
+	return 1;
+}
+
 /* get the mean rtt of a client connection */
 static int
 smp_fetch_fc_rtt(const struct arg *args, struct sample *smp, const char *kw, void *private)
@@ -478,6 +506,11 @@ static struct sample_fetch_kw_list sample_fetch_keywords = {ILH, {
 	{ "bc_dst_port", smp_fetch_dport, 0, NULL, SMP_T_SINT, SMP_USE_L4SRV },
 	{ "bc_src",      smp_fetch_src,   0, NULL, SMP_T_SINT, SMP_USE_L4SRV },
 	{ "bc_src_port", smp_fetch_sport, 0, NULL, SMP_T_SINT, SMP_USE_L4SRV },
+
+#ifdef TCP_INFO
+	{ "bc_rtt",           smp_fetch_bc_rtt,           ARG1(0,STR), val_fc_time_value, SMP_T_SINT, SMP_USE_L4CLI },
+	{ "bc_rttvar",        smp_fetch_bc_rttvar,        ARG1(0,STR), val_fc_time_value, SMP_T_SINT, SMP_USE_L4CLI },
+#endif
 
 	{ "dst",      smp_fetch_dst,   0, NULL, SMP_T_IPV4, SMP_USE_L4CLI },
 	{ "dst_is_local", smp_fetch_dst_is_local, 0, NULL, SMP_T_BOOL, SMP_USE_L4CLI },
