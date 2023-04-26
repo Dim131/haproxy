@@ -302,10 +302,10 @@ int hlua_now(lua_State *L)
 {
 	lua_newtable(L);
 	lua_pushstring(L, "sec");
-	lua_pushinteger(L, now.tv_sec);
+	lua_pushinteger(L, clock_sec(now));
 	lua_rawset(L, -3);
 	lua_pushstring(L, "usec");
-	lua_pushinteger(L, now.tv_usec);
+	lua_pushinteger(L, clock_usec(now));
 	lua_rawset(L, -3);
 	return 1;
 }
