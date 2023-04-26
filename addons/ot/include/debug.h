@@ -28,7 +28,7 @@
 #  ifdef DEBUG_OT_SYSTIME
 #     define FLT_OT_DBG_FMT(f)      "[% 2d] %ld.%06ld [" FLT_OT_SCOPE "]: " f, tid, clock_sec(now), clock_usec(now)
 #  else
-#     define FLT_OT_DBG_FMT(f)      "[% 2d] %11.6f [" FLT_OT_SCOPE "]: " f, tid, FLT_OT_TV_UDIFF(&(flt_ot_debug.start), &now) / 1e6
+#     define FLT_OT_DBG_FMT(f)      "[% 2d] %11.6f [" FLT_OT_SCOPE "]: " f, tid, FLT_OT_TV_UDIFF(&(flt_ot_debug.start), &CLOCK_TO_TV(now)) / 1e6
 #  endif
 #  define FLT_OT_DBG_INDENT         "                                                                                "
 #  define FLT_OT_DBG(l,f, ...)                                                             \

@@ -2626,7 +2626,7 @@ read_again:
 
 	/* If there is data available for analysis, log the end of the idle time. */
 	if (c_data(req) && s->logs.t_idle == -1)
-		s->logs.t_idle = tv_ms_elapsed(&s->logs.tv_accept, &now) - s->logs.t_handshake;
+		s->logs.t_idle = tv_ms_elapsed(&s->logs.tv_accept, &CLOCK_TO_TV(now)) - s->logs.t_handshake;
 
 	to_forward = pcli_parse_request(s, req, &errmsg, &next_pid);
 	if (to_forward > 0) {
@@ -2762,7 +2762,7 @@ int pcli_wait_for_response(struct stream *s, struct channel *rep, int an_bit)
 				sess_change_server(s, NULL);
 		}
 
-		s->logs.t_close = tv_ms_elapsed(&s->logs.tv_accept, &now);
+		s->logs.t_close = tv_ms_elapsed(&s->logs.tv_accept, &CLOCK_TO_TV(now));
 		stream_process_counters(s);
 
 		/* don't count other requests' data */
@@ -2784,7 +2784,7 @@ int pcli_wait_for_response(struct stream *s, struct channel *rep, int an_bit)
 		stream_update_time_stats(s);
 
 		s->logs.accept_date = date; /* user-visible date for logging */
-		s->logs.tv_accept = now;  /* corrected date for internal use */
+		s->logs.tv_accept = CLOCK_TO_TV(now);  /* corrected date for internal use */
 		s->logs.t_handshake = 0; /* There are no handshake in keep alive connection. */
 		s->logs.t_idle = -1;
 		tv_zero(&s->logs.tv_request);

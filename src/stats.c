@@ -4627,7 +4627,7 @@ int stats_fill_info(struct field *info, int len, uint flags)
 	}
 	glob_out_b32 *= 32; // values are 32-byte units
 
-	tv_remain(&start_time, &now, &up);
+	tv_remain(&start_time, &CLOCK_TO_TV(now), &up);
 
 	if (len < INF_TOTAL_FIELDS)
 		return 0;

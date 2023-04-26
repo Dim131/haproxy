@@ -471,7 +471,7 @@ void set_server_check_status(struct check *check, short status, const char *desc
 	if (status == HCHK_STATUS_START) {
 		check->result = CHK_RES_UNKNOWN;	/* no result yet */
 		check->desc[0] = '\0';
-		check->start = now;
+		check->start = CLOCK_TO_TV(now);
 		return;
 	}
 
@@ -492,7 +492,7 @@ void set_server_check_status(struct check *check, short status, const char *desc
 		check->duration = -1;
 	else if (!tv_iszero(&check->start)) {
 		/* set_server_check_status() may be called more than once */
-		check->duration = tv_ms_elapsed(&check->start, &now);
+		check->duration = tv_ms_elapsed(&check->start, &CLOCK_TO_TV(now));
 		tv_zero(&check->start);
 	}
 
@@ -1499,7 +1499,7 @@ int start_check_task(struct check *check, int mininter,
 
 	/* check this every ms */
 	t->expire = tick_add(now_ms, MS_TO_TICKS(mininter * srvpos / nbcheck));
-	check->start = now;
+	check->start = CLOCK_TO_TV(now);
 	task_queue(t);
 
 	return 1;

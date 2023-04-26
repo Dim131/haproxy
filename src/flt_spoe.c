@@ -264,9 +264,9 @@ static inline void
 spoe_update_stat_time(struct timeval *tv, long *t)
 {
 	if (*t == -1)
-		*t = tv_ms_elapsed(tv, &now);
+		*t = tv_ms_elapsed(tv, &CLOCK_TO_TV(now));
 	else
-		*t += tv_ms_elapsed(tv, &now);
+		*t += tv_ms_elapsed(tv, &CLOCK_TO_TV(now));
 	tv_zero(tv);
 }
 
@@ -1619,7 +1619,7 @@ spoe_handle_sending_frame_appctx(struct appctx *appctx, int *skip)
 		LIST_APPEND(&SPOE_APPCTX(appctx)->waiting_queue, &ctx->list);
 	}
 	_HA_ATOMIC_INC(&agent->counters.nb_waiting);
-	ctx->stats.tv_wait = now;
+	ctx->stats.tv_wait = CLOCK_TO_TV(now);
 	SPOE_APPCTX(appctx)->frag_ctx.ctx    = NULL;
 	SPOE_APPCTX(appctx)->frag_ctx.cursid = 0;
 	SPOE_APPCTX(appctx)->frag_ctx.curfid = 0;
@@ -1676,7 +1676,7 @@ spoe_handle_receiving_frame_appctx(struct appctx *appctx, int *skip)
 			LIST_INIT(&ctx->list);
 			_HA_ATOMIC_DEC(&agent->counters.nb_waiting);
 			spoe_update_stat_time(&ctx->stats.tv_wait, &ctx->stats.t_waiting);
-			ctx->stats.tv_response = now;
+			ctx->stats.tv_response = CLOCK_TO_TV(now);
 			if (ctx->spoe_appctx) {
 				ctx->spoe_appctx->cur_fpa--;
 				ctx->spoe_appctx = NULL;
@@ -2126,7 +2126,7 @@ spoe_queue_context(struct spoe_context *ctx)
 	 * it. */
 	_HA_ATOMIC_INC(&agent->counters.nb_sending);
 	spoe_update_stat_time(&ctx->stats.tv_request, &ctx->stats.t_request);
-	ctx->stats.tv_queue = now;
+	ctx->stats.tv_queue = CLOCK_TO_TV(now);
 	if (ctx->spoe_appctx)
 		return 1;
 	LIST_APPEND(&agent->rt[tid].sending_queue, &ctx->list);
@@ -2596,8 +2596,8 @@ spoe_start_processing(struct spoe_agent *agent, struct spoe_context *ctx, int di
 		return 0;
 
 	agent->rt[tid].processing++;
-	ctx->stats.tv_start   = now;
-	ctx->stats.tv_request = now;
+	ctx->stats.tv_start   = CLOCK_TO_TV(now);
+	ctx->stats.tv_request = CLOCK_TO_TV(now);
 	ctx->stats.t_request  = -1;
 	ctx->stats.t_queue    = -1;
 	ctx->stats.t_waiting  = -1;
@@ -2708,7 +2708,7 @@ spoe_process_messages(struct stream *s, struct spoe_context *ctx,
 
 	if (ctx->state == SPOE_CTX_ST_ENCODING_MSGS) {
 		if (tv_iszero(&ctx->stats.tv_request))
-			ctx->stats.tv_request = now;
+			ctx->stats.tv_request = CLOCK_TO_TV(now);
 		if (!spoe_acquire_buffer(&ctx->buffer, &ctx->buffer_wait))
 			goto out;
 		ret = spoe_encode_messages(s, ctx, messages, dir, type);

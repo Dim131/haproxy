@@ -2018,7 +2018,7 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 		tmp_strm_log.t_queue = -1;
 		tmp_strm_log.t_connect = -1;
 		tmp_strm_log.t_data = -1;
-		tmp_strm_log.t_close = tv_ms_elapsed(&sess->tv_accept, &now);
+		tmp_strm_log.t_close = tv_ms_elapsed(&sess->tv_accept, &CLOCK_TO_TV(now));
 		tmp_strm_log.bytes_in = 0;
 		tmp_strm_log.bytes_out = 0;
 		tmp_strm_log.prx_queue_pos = 0;

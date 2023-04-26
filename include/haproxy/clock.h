@@ -54,6 +54,8 @@ static inline void clock_update_date(int max_wait, int interrupted)
 	clock_update_global_date();
 }
 
+#define CLOCK_TO_TV(tv) ((const struct timeval){ .tv_sec = tv.tv_sec, .tv_usec = tv.tv_usec})
+
 static forceinline ulong clock_sec(const struct timeval t)
 {
 	return (ulong)(long)t.tv_sec;

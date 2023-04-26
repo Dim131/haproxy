@@ -902,7 +902,7 @@ static void back_establish(struct stream *s)
 	/* First, centralize the timers information, and clear any irrelevant
 	 * timeout.
 	 */
-	s->logs.t_connect = tv_ms_elapsed(&s->logs.tv_accept, &now);
+	s->logs.t_connect = tv_ms_elapsed(&s->logs.tv_accept, &CLOCK_TO_TV(now));
 	s->conn_exp = TICK_ETERNITY;
 	s->flags &= ~SF_CONN_EXP;
 
@@ -2595,7 +2595,7 @@ struct task *process_stream(struct task *t, void *context, unsigned int state)
 	}
 
 	if (!(s->flags & SF_IGNORE)) {
-		s->logs.t_close = tv_ms_elapsed(&s->logs.tv_accept, &now);
+		s->logs.t_close = tv_ms_elapsed(&s->logs.tv_accept, &CLOCK_TO_TV(now));
 
 		stream_process_counters(s);
 
