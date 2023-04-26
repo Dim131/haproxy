@@ -29,7 +29,7 @@ extern struct timeval              start_date;    /* the process's start date in
 extern struct timeval              start_time;    /* the process's start date in internal monotonic time */
 extern volatile ullong             global_now;    /* common monotonic date between all threads (32:32) */
 
-extern THREAD_LOCAL struct timeval now;           /* internal monotonic date derived from real clock */
+extern THREAD_LOCAL ullong         now;           /* internal monotonic date derived from real clock (32:32) */
 extern THREAD_LOCAL struct timeval date;          /* the real current date (wall-clock time) */
 
 uint64_t now_cpu_time_thread(int thr);
@@ -54,31 +54,33 @@ static inline void clock_update_date(int max_wait, int interrupted)
 	clock_update_global_date();
 }
 
-#define CLOCK_TO_TV(tv) ((const struct timeval){ .tv_sec = tv.tv_sec, .tv_usec = tv.tv_usec})
+/* these functions take a time in the format 32:32 for sec:usec */
 
-static forceinline ulong clock_sec(const struct timeval t)
+#define CLOCK_TO_TV(t) ((const struct timeval){ .tv_sec = clock_sec(t), .tv_usec = clock_usec(t) })
+
+static forceinline ulong clock_sec(const ullong t)
 {
-	return (ulong)(long)t.tv_sec;
+	return (ulong)(t >> 32);
 }
 
-static forceinline ulong clock_usec(const struct timeval t)
+static forceinline ulong clock_usec(const ullong t)
 {
-	return (ulong)(long)t.tv_usec;
+	return (ulong)(t & 0xffffffffu);
 }
 
-static forceinline uint64_t clock_to_msec(const struct timeval t)
+static forceinline uint64_t clock_to_msec(const ullong t)
 {
 	return (clock_sec(t))  * 1000ull +
 	       (clock_usec(t)) / 1000ull;
 }
 
-static forceinline uint64_t clock_to_usec(const struct timeval t)
+static forceinline uint64_t clock_to_usec(const ullong t)
 {
 	return (clock_sec(t))  * 1000000ull +
 	       (clock_usec(t));
 }
 
-static forceinline uint64_t clock_to_nsec(const struct timeval t)
+static forceinline uint64_t clock_to_nsec(const ullong t)
 {
 	return (clock_sec(t))  * 1000000000ull +
 	       (clock_usec(t)) * 1000ull;
