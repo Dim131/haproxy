@@ -54,4 +54,32 @@ static inline void clock_update_date(int max_wait, int interrupted)
 	clock_update_global_date();
 }
 
+static forceinline ulong clock_sec(const struct timeval t)
+{
+	return (ulong)(long)t.tv_sec;
+}
+
+static forceinline ulong clock_usec(const struct timeval t)
+{
+	return (ulong)(long)t.tv_usec;
+}
+
+static forceinline uint64_t clock_to_msec(const struct timeval t)
+{
+	return (clock_sec(t))  * 1000ull +
+	       (clock_usec(t)) / 1000ull;
+}
+
+static forceinline uint64_t clock_to_usec(const struct timeval t)
+{
+	return (clock_sec(t))  * 1000000ull +
+	       (clock_usec(t));
+}
+
+static forceinline uint64_t clock_to_nsec(const struct timeval t)
+{
+	return (clock_sec(t))  * 1000000000ull +
+	       (clock_usec(t)) * 1000ull;
+}
+
 #endif
