@@ -569,6 +569,9 @@ static struct server *get_server_rnd(struct stream *s, const struct server *avoi
 	if (px->lbprm.tot_weight == 0)
 		return NULL;
 
+   // With probability 1/2 reduce the number of draws to 1.
+   if (rand() % 2 == 0) draws = 1;
+
 	curr = NULL;
 	do {
 		prev = curr;
